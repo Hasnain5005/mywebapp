@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mid Rock Coin Web App</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/2/2e/Flag_of_Pakistan.svg') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+    }
+    header {
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      background: rgba(0,0,0,0.5);
+    }
+    .container {
+      margin-top: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    input {
+      padding: 10px;
+      margin: 5px;
+      width: 250px;
+      border-radius: 5px;
+      border: none;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #dashboard {
+      display: none;
+      margin-top: 30px;
+      text-align: left;
+      background: rgba(0,0,0,0.6);
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+    }
+    .section {
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<header>بسم اللہ الرحمن الرحیم - Mid Rock Coin</header>
+
+<div class="container" id="auth-container">
+  <h2>Login / Signup</h2>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="text" id="username" placeholder="Username (Signup only)">
+  <input type="password" id="password" placeholder="Password" required>
+  <div>
+    <button id="signup-btn">Signup</button>
+    <button id="login-btn">Login</button>
+  </div>
+  <p id="auth-msg"></p>
+</div>
+
+<div id="dashboard">
+  <h2>Welcome, <span id="user-name"></span></h2>
+  <div class="section">
+    <strong>Coin Balance:</strong> <span id="coin-balance">0</span>
+  </div>
+  <div class="section">
+    <strong>Points:</strong> <span id="points">0</span>
+  </div>
+  <div class="section">
+    <strong>Referral Coins:</strong> <span id="ref-coins">0</span>
+  </div>
+  <div class="section">
+    <button id="claim-coin-btn">Claim Coin (Weekly)</button>
+    <button id="watch-ad-btn">Watch Ad (1-100 Points)</button>
+    <button id="swap-coin-btn">Swap Coins to PKR</button>
+    <button id="logout-btn">Logout</button>
+  </div>
+</div>
+
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyB5eo1y81OryaZ-suV_FMpe04_edMIa6Hk",
+    authDomain: "mid-rock-coin.firebaseapp.com",
+    projectId: "mid-rock-coin",
+    storageBucket: "mid-rock-coin.firebasestorage.app",
+    messagingSenderId: "911725035840",
+    appId: "1:911725035840:web:fe14626d187c11ecb83aa5",
+    measurementId: "G-YGPCZ8ZR49"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  // Pre-registered accounts (for demo)
+  const preRegisteredAccounts = [
+    {email: 'hasnainjadoon5005@gmail.com', password: 'Hasnain5005*', role: 'CEO', username: 'Hasnain'},
+    {email: 'hasnainjadoon6006@gmail.com', password: 'Hasnain6006*', role: 'MD', username: 'MDHasnain'}
+  ];
+
+  const authMsg = document.getElementById('auth-msg');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const usernameInput = document.getElementById('username');
+
+  const signupBtn = document.getElementById('signup-btn');
+  const loginBtn = document.getElementById('login-btn');
+  const dashboard = document.getElementById('dashboard');
+  const userNameDisplay = document.getElementById('user-name');
+  const coinBalanceDisplay = document.getElementById('coin-balance');
+  const pointsDisplay = document.getElementById('points');
+  const refCoinsDisplay = document.getElementById('ref-coins');
+
+  const claimCoinBtn = document.getElementById('claim-coin-btn');
+  const watchAdBtn = document.getElementById('watch-ad-btn');
+  const swapCoinBtn = document.getElementById('swap-coin-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+
+  // Utility: create user in Firestore
+  async function createUserInDB(uid, email, username, role='User') {
+    await db.collection('users').doc(uid).set({
+      email,
+      username,
+      role,
+      coins: 0,
+      points: 0,
+      referralCoins: 0
+    });
+  }
+
+  // Signup
+  signupBtn.addEventListener('click', async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    const username = usernameInput.value;
+    if(!email || !password || !username) {
+      authMsg.innerText = 'All fields are required for signup';
+      return;
+    }
+    try {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      await createUserInDB(userCredential.user.uid, email, username);
+      authMsg.innerText = 'Signup successful! Logging in...';
+      showDashboard(userCredential.user.uid);
+    } catch(e) {
+      authMsg.innerText = e.message;
+    }
+  });
+
+  // Login
+  loginBtn.addEventListener('click', async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    if(!email || !password) {
+      authMsg.innerText = 'Email and password required';
+      return;
+    }
+    try {
+      const userCredential = await auth.signInWithEmailAndPassword(email, password);
+      authMsg.innerText = 'Login successful!';
+      showDashboard(userCredential.user.uid);
+    } catch(e) {
+      authMsg.innerText = e.message;
+    }
+  });
+
+  // Show dashboard
+  async function showDashboard(uid) {
+    document.getElementById('auth-container').style.display = 'none';
+    dashboard.style.display = 'block';
+    const userDoc = await db.collection('users').doc(uid).get();
+    const userData = userDoc.data();
+    userNameDisplay.innerText = userData.username;
+    coinBalanceDisplay.innerText = userData.coins;
+    pointsDisplay.innerText = userData.points;
+    refCoinsDisplay.innerText = userData.referralCoins;
+  }
+
+  // Logout
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut();
+    dashboard.style.display = 'none';
+    document.getElementById('auth-container').style.display = 'flex';
+    authMsg.innerText = '';
+    emailInput.value = '';
+    passwordInput.value = '';
+    usernameInput.value = '';
+  });
+
+  // Claim coin (weekly)
+  claimCoinBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if(!user) return;
+    const userRef = db.collection('users').doc(user.uid);
+    const userDoc = await userRef.get();
+    const userData = userDoc.data();
+    // Simple weekly claim demo
+    const coins = userData.coins + 1;
+    await userRef.update({coins});
+    coinBalanceDisplay.innerText = coins;
+    alert('You claimed 1 coin!');
+  });
+
+  // Watch ad (earn points)
+  watchAdBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if(!user) return;
+    const userRef = db.collection('users').doc(user.uid);
+    const userDoc = await userRef.get();
+    const userData = userDoc.data();
+    const pointsEarned = Math.floor(Math.random() * 100) + 1;
+    const points = userData.points + pointsEarned;
+    await userRef.update({points});
+    pointsDisplay.innerText = points;
+    alert(`You earned ${pointsEarned} points from ad!`);
+  });
+
+  // Swap coins to PKR
+  swapCoinBtn.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if(!user) return;
+    const userRef = db.collection('users').doc(user.uid);
+    const userDoc = await userRef.get();
+    const userData = user
