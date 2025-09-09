@@ -1,0 +1,151 @@
+/* Reset default browser styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Body & Background */
+body {
+    background: linear-gradient(to bottom, #e0f7fa, #a5d6a7);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+header {
+    background-color: #00743f;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 1.5rem;
+}
+
+header .flag {
+    font-size: 1.5rem;
+}
+
+/* Main container */
+main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Auth Form Container */
+.auth-container {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-container h2 {
+    margin-bottom: 20px;
+    color: #00743f;
+}
+
+/* Input Fields */
+.auth-form input {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: #00743f;
+    box-shadow: 0 0 5px rgba(0,116,63,0.5);
+}
+
+/* Buttons */
+.auth-form button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #00743f;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.auth-form button:hover {
+    background-color: #005a30;
+}
+
+/* Dashboard Container */
+.dashboard-container {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.dashboard-container h2 {
+    color: #00743f;
+    margin-bottom: 20px;
+}
+
+/* Dashboard Buttons */
+.actions button {
+    margin: 8px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: #00743f;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.actions button:hover {
+    background-color: #005a30;
+}
+
+/* Transactions Display */
+#transactions {
+    margin-top: 20px;
+    text-align: left;
+    max-height: 200px;
+    overflow-y: auto;
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    font-size: 0.9rem;
+}
+
+/* User message display */
+#user-message {
+    margin-bottom: 15px;
+    color: red;
+    font-weight: bold;
+}
+
+/* Footer */
+footer {
+    background-color: #00743f;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 0.9rem;
+}
